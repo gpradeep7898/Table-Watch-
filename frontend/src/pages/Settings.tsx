@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Bell, Lock, RotateCcw, Save, ShieldCheck, SlidersHorizontal, Trash2, User } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Bell, Camera, Lock, RotateCcw, Save, ShieldCheck, SlidersHorizontal, Trash2, User } from "lucide-react";
 import { Card, ErrorText, Modal, Toggle } from "../components/ui";
 import { useToasts } from "../hooks/useToasts";
 import { ApiError, api } from "../services/api";
@@ -190,6 +191,15 @@ export function SettingsPage() {
           </p>
         </Card>
       </div>
+
+      <Card title="Camera configurations" icon={<Camera className="h-4 w-4 text-txt-muted" />}>
+        <p className="text-sm text-txt-muted">
+          Video sources, sampling rate, camera angle (anchor) and table zones are managed on the Cameras page. Only sources you add there are ever opened.
+        </p>
+        <div className="mt-3 flex gap-2">
+          <Link className="btn-secondary" to="/cameras">Open cameras</Link>
+        </div>
+      </Card>
 
       <Card title="Privacy and data retention" icon={<ShieldCheck className="h-4 w-4 text-txt-muted" />}>
         <div className="grid gap-5 lg:grid-cols-2">
