@@ -5,8 +5,10 @@ import queue
 import time
 from pathlib import Path
 
-import numpy as np
 import pytest
+
+np = pytest.importorskip("numpy")
+cv2 = pytest.importorskip("cv2")
 
 from tablewatch.config.layout import project_root
 from tablewatch.vision.detector import Detection, decode_yolox, model_status, nms, postprocess
@@ -19,8 +21,6 @@ from tablewatch.vision.sources import (
     validate_rtsp_url,
 )
 from tablewatch.vision.tracker import ByteTracker, iou
-
-cv2 = pytest.importorskip("cv2")
 
 
 class FakeDetector:
@@ -179,3 +179,51 @@ def test_real_detector_finds_people_in_real_video():
     people = det.detect(frame)
     assert len(people) >= 4  # a busy pedestrian scene, not a restaurant
     assert all(0 <= d.score <= 1 for d in people)
+
+
+def test_recorded_mode_runs_real_pipeline_into_its_own_dataset(tmp_path, monkeypatch):
+    """Runtime → CvSession → CameraWorker → engine → SQLite, with a fake detector."""
+    from tablewatch.config.layout import load_layout
+    from tablewatch.services.runtime import Runtime
+    from tablewatch.services.settings import SettingsService
+    from tablewatch.simulation.scenarios import load_scenarios
+    from tablewatch.storage.db import Store
+
+    monkeypatch.setenv("TABLEWATCH_MEDIA_DIRS", str(tmp_path))
+    video = _make_video(tmp_path / "service.avi", seconds=3.0)
+
+    class StillPerson:
+        name = "fake-still"
+
+        def detect(self, frame):
+            return [Detection((40, 60, 80, 180), 0.9)]  # always inside T1's zone
+
+    store = Store(tmp_path / "rt.db")
+    layout = load_layout()
+    rt = Runtime(store, layout, load_scenarios(), SettingsService(store), detector_factory=StillPerson, require_model=False)
+    rt.start_simulation(autoplay=False)
+    store.upsert_camera("clip", layout.id, "clip", "file", {"path": str(video), "sample_fps": 10})
+    rt.set_zones("clip", "bottom_center", [{"table_id": "T1", "polygon": [[0.0, 0.0], [0.5, 0.0], [0.5, 1.0], [0.0, 1.0]]}])
+    th, v = rt.settings.thresholds()
+    from dataclasses import replace
+
+    rt.apply_thresholds(replace(th, occupancy_confirm_s=1.0, lost_track_grace_s=0.5), v)
+    rt.start_cv("recorded", ["clip"])
+    assert rt.mode == "recorded"
+    deadline = time.time() + 15
+    while time.time() < deadline and not rt.cv.finished:
+        rt.tick(0.1)
+        time.sleep(0.05)
+    rt.tick(0.1)
+    assert rt.cv.workers["clip"].metrics.status == "ended"
+    events = store.events("recorded", rt.run_id, limit=100)
+    seated = [e for e in events if e["type"] == "GUESTS_SEATED"]
+    assert seated and seated[0]["table_id"] == "T1" and seated[0]["source"] == "computer_vision"
+    assert store.events("simulation", limit=1000) == [] or all(e["dataset"] == "simulation" for e in store.events("simulation", limit=1000))
+    snap = rt.snapshot()
+    assert snap["mode"] == "recorded" and snap["clock"]["simulated"] is False
+    t1 = next(t for t in snap["tables"] if t["table_id"] == "T1")
+    assert t1["state"] == "SEATED_UNSERVED" and t1["health"] == "OK"
+    assert next(t for t in snap["tables"] if t["table_id"] == "T2")["health"] == "UNKNOWN"
+    rt.back_to_simulation()
+    assert rt.mode == "simulation" and rt.cv is None

@@ -141,8 +141,9 @@ class CvSession:
 
 class Runtime:
     def __init__(self, store: Store, layout: Layout, scenarios: dict[str, Scenario], settings: SettingsService,
-                 detector_factory: Callable[[], Any] | None = None) -> None:
+                 detector_factory: Callable[[], Any] | None = None, require_model: bool = True) -> None:
         self.store = store
+        self.require_model = require_model
         self.layout = layout
         self.scenarios = scenarios
         self.settings = settings
@@ -365,7 +366,7 @@ class Runtime:
             raise ActionError("Video processing is not available in this installation.", "vision_unavailable")
         from ..vision.detector import model_status
 
-        status = model_status()
+        status = model_status() if self.require_model else {"ready": True}
         if not status["ready"]:
             missing = []
             if not (status["onnxruntime"] and status["opencv"]):
