@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tablewatch"
+version = "0.1.0"
+description = "TableWatch AI: restaurant table monitoring MVP (local, privacy-first)"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.29",
+  "pydantic>=2.6",
+  "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+# Real video / camera processing. Not needed for demo mode.
+vision = [
+  "numpy>=1.26",
+  "opencv-python-headless>=4.9",
+  "onnxruntime>=1.17",
+]
+dev = [
+  "pytest>=8.0",
+  "httpx>=0.27",
+]
+
+[project.scripts]
+tablewatch = "tablewatch.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["tablewatch*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
