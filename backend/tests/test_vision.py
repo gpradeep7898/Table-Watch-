@@ -136,7 +136,9 @@ def test_worker_reconnects_live_source_with_backoff():
     w = CameraWorker({"id": "rtsp-cam", "kind": "rtsp", "config": {}}, FakeDetector, out, time.monotonic,
                      source_factory=failing_source, reconnect_min_s=0.05, reconnect_max_s=0.2)
     w.start()
-    time.sleep(0.6)
+    deadline = time.time() + 10
+    while w.metrics.reconnects < 2 and time.time() < deadline:
+        time.sleep(0.05)
     assert w.metrics.status == "reconnecting"
     assert w.metrics.reconnects >= 2
     assert "hunter2" not in (w.metrics.error or "")

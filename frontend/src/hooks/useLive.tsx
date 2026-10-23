@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { api } from "../services/api";
+import { ApiError, api } from "../services/api";
 import type { FramesMsg, Layout, Snapshot, TWEvent } from "../types/api";
 import { useToasts } from "./useToasts";
 
@@ -9,6 +9,7 @@ interface LiveValue {
   events: TWEvent[];
   layout: Layout | null;
   connected: boolean;
+  problem: string | null;
   refresh: () => Promise<void>;
   reloadLayout: () => Promise<void>;
 }
@@ -22,6 +23,7 @@ export function LiveProvider({ children }: { children: ReactNode }) {
   const [events, setEvents] = useState<TWEvent[]>([]);
   const [layout, setLayout] = useState<Layout | null>(null);
   const [connected, setConnected] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
   const { alertToast } = useToasts();
   const alertToastRef = useRef(alertToast);
   alertToastRef.current = alertToast;
@@ -39,9 +41,21 @@ export function LiveProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     try {
       const s = await api.state();
+      if (!s || (s as any).type !== "snapshot" || !Array.isArray(s.tables)) {
+        setProblem("Something answered at /api, but it is not the TableWatch server. Another program may be using its port. Restart with ./scripts/start-demo.sh.");
+        return;
+      }
       setSnapshot(s);
-    } catch {
-      /* handled by connection state */
+      setProblem(null);
+    } catch (e) {
+      const err = e as ApiError;
+      setProblem(
+        err.status === 0 || err.status >= 500
+          ? "Cannot reach the TableWatch server. Is ./scripts/start-demo.sh still running in Terminal?"
+          : err.status === 404
+            ? "The server at /api is not TableWatch (404). Another program may be using port 8000. Restart with ./scripts/start-demo.sh."
+            : err.message,
+      );
     }
   }, []);
 
@@ -63,10 +77,12 @@ export function LiveProvider({ children }: { children: ReactNode }) {
       ws = new WebSocket(`${proto}://${location.host}/ws`);
       ws.onopen = () => {
         setConnected(true);
+        setProblem(null);
         loadEvents();
         reloadLayout();
       };
       ws.onclose = () => {
+        if (!stopped) refresh();
         setConnected(false);
         if (!stopped) retry = setTimeout(connect, 1500);
       };
@@ -100,16 +116,27 @@ export function LiveProvider({ children }: { children: ReactNode }) {
       };
     };
     connect();
+    // Load immediately over HTTP, and keep polling while the live socket is down.
+    refresh();
+    reloadLayout();
+    loadEvents();
+    const poll = setInterval(() => {
+      if (ws?.readyState !== WebSocket.OPEN) {
+        refresh();
+        reloadLayout();
+      }
+    }, 2000);
     return () => {
+      clearInterval(poll);
       stopped = true;
       if (retry) clearTimeout(retry);
       ws?.close();
     };
-  }, [loadEvents, reloadLayout]);
+  }, [loadEvents, reloadLayout, refresh]);
 
   const value = useMemo(
-    () => ({ snapshot, frames, events, layout, connected, refresh, reloadLayout }),
-    [snapshot, frames, events, layout, connected, refresh, reloadLayout],
+    () => ({ snapshot, frames, events, layout, connected, problem, refresh, reloadLayout }),
+    [snapshot, frames, events, layout, connected, problem, refresh, reloadLayout],
   );
   return <LiveContext.Provider value={value}>{children}</LiveContext.Provider>;
 }

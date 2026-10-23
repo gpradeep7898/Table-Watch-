@@ -146,7 +146,7 @@ export function TopBar({ onMenu }: { onMenu?: () => void }) {
 
 export function Shell() {
   const [menu, setMenu] = useState(false);
-  const { snapshot } = useLive();
+  const { snapshot, problem, connected } = useLive();
   useEffect(() => {
     document.title = snapshot?.summary.active_alerts ? `(${snapshot.summary.active_alerts}) TableWatch AI` : "TableWatch AI";
   }, [snapshot?.summary.active_alerts]);
@@ -171,6 +171,16 @@ export function Shell() {
       )}
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar onMenu={() => setMenu(true)} />
+        {problem && (
+          <div role="alert" className="mx-4 mt-3 rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-200 sm:mx-6">
+            {problem}
+          </div>
+        )}
+        {!problem && !connected && snapshot && (
+          <div role="status" className="mx-4 mt-3 rounded-lg border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-100 sm:mx-6">
+            Live updates are reconnecting. Showing data refreshed every 2 seconds instead.
+          </div>
+        )}
         {snapshot?.error && (
           <div role="alert" className="mx-4 mt-3 rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-200 sm:mx-6">
             Server reported a problem: {snapshot.error}

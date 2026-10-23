@@ -52,7 +52,7 @@ def health(request: Request) -> dict[str, Any]:
     from ..vision.detector import model_status
 
     r = rt(request)
-    return {"ok": True, "mode": r.mode, "run_id": r.run_id, "vision": model_status(), "error": r.last_error}
+    return {"ok": True, "app": "tablewatch", "mode": r.mode, "run_id": r.run_id, "vision": model_status(), "error": r.last_error}
 
 
 @router.get("/state")
