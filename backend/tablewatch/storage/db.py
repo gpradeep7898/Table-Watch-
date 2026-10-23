@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 import threading
 import time
@@ -180,6 +181,7 @@ class Store:
         if self.path != ":memory:":
             self.conn.execute("PRAGMA journal_mode=WAL")
         self.conn.execute("PRAGMA foreign_keys=ON")
+        self.conn.execute("PRAGMA busy_timeout=15000")
         self.conn.execute("PRAGMA synchronous=NORMAL")
         self.migrate()
 
@@ -208,7 +210,7 @@ class Store:
         """Group many writes into one transaction (used by fast simulations)."""
         with self._lock:
             if self._batch == 0:
-                self.conn.execute("BEGIN")
+                self.conn.execute("BEGIN IMMEDIATE")
             self._batch += 1
             try:
                 yield
@@ -269,7 +271,7 @@ class Store:
             now = time.time()
             own = self._batch == 0
             if own:
-                self.conn.execute("BEGIN")
+                self.conn.execute("BEGIN IMMEDIATE")
             try:
                 self.conn.execute("DELETE FROM table_zones WHERE camera_id=?", (camera_id,))
                 for z in zones:
@@ -293,6 +295,10 @@ class Store:
         rows = self.q("SELECT * FROM table_zones WHERE camera_id=? ORDER BY table_id", (camera_id,))
         if not rows:
             return None, [], 0
+        def natural(r: dict[str, Any]) -> list[Any]:
+            return [int(p) if p.isdigit() else p for p in re.split(r"(\d+)", r["table_id"])]
+
+        rows.sort(key=natural)
         return (
             rows[0]["anchor"],
             [{"table_id": r["table_id"], "polygon": json.loads(r["polygon_json"])} for r in rows],
@@ -360,7 +366,7 @@ class Store:
     # ------------------------------------------------------------------
     def append_event(self, ev: Event, dataset: str, run_id: str) -> bool:
         """Insert an event and update projections. Returns False for duplicates."""
-        with self._lock:
+        with self.batch():
             cur = self.conn.execute(
                 """INSERT OR IGNORE INTO events (id, dataset, run_id, engine_seq, key, type, t, wall, table_id, camera_id,
                    session_id, source, from_state, to_state, payload_json) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
