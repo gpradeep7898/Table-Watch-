@@ -1,0 +1,26 @@
+id: normal
+order: 1
+name: "A: Normal service"
+summary: Guests arrive, get served, eat, leave. Staff clean and reset tables.
+description: >
+  A calm Friday lunch. Parties are seated, a server visits, the simulated
+  staff tablet confirms service, guests leave, a busser cleans and confirms.
+  Every transition comes from synthetic observations passing through the
+  same state machine used for real video.
+seed: 101
+start_time: "2026-10-23T12:00:00"
+duration_s: 1700
+waiters: 3
+staff_auto_confirm: true
+confirm_lag_s: [6, 18]
+alert_response_lag_s: [30, 50]
+parties:
+  - { table: T3, size: 3, arrive_s: 5,   service_delay_s: 45, dine_s: 780, cleaning_delay_s: 40 }
+  - { table: T6, size: 4, arrive_s: 35,  service_delay_s: 70, dine_s: 960, cleaning_delay_s: 60 }
+  - { table: T1, size: 2, arrive_s: 110, service_delay_s: 40, dine_s: 700, cleaning_delay_s: 45 }
+  - { table: T9, size: 4, arrive_s: 190, service_delay_s: 60, dine_s: 900, cleaning_delay_s: 50 }
+  - { table: T5, size: 2, arrive_s: 420, service_delay_s: 50, dine_s: 640, cleaning_delay_s: 40 }
+  - { table: T7, size: 5, arrive_s: 520, service_delay_s: 80, dine_s: 760, cleaning_delay_s: 70 }
+walkers:
+  - { at_s: 300, route: restroom }
+  - { at_s: 860, route: restroom }

@@ -1,0 +1,21 @@
+id: slow_cleaning
+order: 3
+name: "C: Slow table cleaning"
+summary: Guests leave, nobody buses the table, and the cleaning alert escalates.
+description: >
+  Table 5's guests finish quickly and leave. The table enters
+  NEEDS_CLEANING and the cleaning timer starts. Nobody comes, so after the
+  configured threshold a CLEANING_OVERDUE escalation fires. The timeout
+  never marks the table clean. Only a cleaning confirmation returns it to
+  FREE.
+seed: 303
+start_time: "2026-10-23T13:15:00"
+duration_s: 1300
+waiters: 2
+staff_auto_confirm: true
+confirm_lag_s: [8, 15]
+alert_response_lag_s: [40, 60]
+parties:
+  - { table: T5, size: 2, arrive_s: 5,   service_delay_s: 40, dine_s: 280, cleaning_delay_s: null }
+  - { table: T8, size: 2, arrive_s: 30,  service_delay_s: 50, dine_s: 900, cleaning_delay_s: 50 }
+  - { table: T3, size: 4, arrive_s: 90,  service_delay_s: 60, dine_s: 800, cleaning_delay_s: 60 }

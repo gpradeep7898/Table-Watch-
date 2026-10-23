@@ -240,7 +240,7 @@ class RestaurantEngine:
         return out
 
     def _camera_online(self, cam: CameraState, t: float) -> list[Event]:
-        gap = t - (cam.offline_since or t)
+        gap = t - (t if cam.offline_since is None else cam.offline_since)
         cam.offline = False
         for sm in self.tables.values():
             if sm.proj.camera_id == cam.camera_id:

@@ -1,0 +1,33 @@
+id: tracking
+order: 5
+name: "E: Tracking problems"
+summary: Occlusions, ID switches, a wandering guest, an overlap and a camera outage.
+description: >
+  Stress test for the state machine. A guest drops out of view, track IDs
+  change, someone leans over a seated guest, a guest chats beside another
+  table, a person stands where two booth zones overlap, detections get
+  blurry, and the camera drops out for a minute. None of this should make
+  a table flip state. Watch the uncertainty indicators instead.
+seed: 505
+start_time: "2026-10-23T18:00:00"
+duration_s: 1500
+waiters: 3
+staff_auto_confirm: true
+confirm_lag_s: [8, 15]
+alert_response_lag_s: [30, 45]
+parties:
+  - { table: T6, size: 3, arrive_s: 5,   service_delay_s: 50, dine_s: 1100, cleaning_delay_s: 60 }
+  - { table: T2, size: 2, arrive_s: 20,  service_delay_s: 50, dine_s: 420,  cleaning_delay_s: 50 }
+  - { table: T9, size: 4, arrive_s: 40,  service_delay_s: 60, dine_s: 1100, cleaning_delay_s: 60 }
+  - { table: T10, size: 3, arrive_s: 70, service_delay_s: 60, dine_s: 1000, cleaning_delay_s: 60 }
+disturbances:
+  - { type: dropout,        party: 0, member: 0, at_s: 180, duration_s: 25 }
+  - { type: id_switch,      party: 0, member: 1, at_s: 230 }
+  - { type: id_switch,      party: 0, member: 2, at_s: 231 }
+  - { type: occlusion,      party: 0, member: 0, at_s: 300, duration_s: 15 }
+  - { type: wander,         party: 1, member: 0, to_table: T3, at_s: 260, duration_s: 12 }
+  - { type: camera_outage,  at_s: 430, duration_s: 60 }
+  - { type: low_confidence, party: 2, at_s: 620, duration_s: 50, confidence: 0.25 }
+  - { type: ambiguous_stand, tables: [T9, T10], at_s: 760, duration_s: 45 }
+walkers:
+  - { at_s: 350, route: restroom }

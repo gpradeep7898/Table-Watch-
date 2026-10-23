@@ -1,0 +1,18 @@
+# Default thresholds. Values saved from the Settings page are stored as
+# versioned configuration in the local database and take precedence.
+# All times are seconds of domain time (simulated time in demo mode).
+occupancy_confirm_s: 30
+departure_confirm_s: 90
+lost_track_grace_s: 8
+unserved_warning_s: 300
+cleaning_overdue_s: 300
+min_visit_s: 8
+max_visit_s: 180
+detection_confidence: 0.4
+camera_offline_after_s: 10
+low_confidence_alert_s: 30
+low_confidence_clear_s: 15
+max_observation_gap_s: 5
+reassociation_window_s: 15
+reassociation_distance: 0.08
+ambiguity_margin: 0.015

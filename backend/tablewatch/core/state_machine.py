@@ -334,7 +334,7 @@ class TableStateMachine:
             to_state=TableState.NEEDS_CLEANING,
             payload={
                 "left_t": left_t,
-                "occupied_s": round(left_t - (p.seated_t or left_t), 3),
+                "occupied_s": round(left_t - (left_t if p.seated_t is None else p.seated_t), 3),
                 "served": p.service_t is not None,
                 "during_observation_gap": ev.absence_had_gap,
                 "observed_absence_s": round(ev.absent_accum, 3),
@@ -386,7 +386,10 @@ class TableStateMachine:
             if t - v.last_seen > th.lost_track_grace_s:
                 del ev.visitors[tid]
                 if stay >= th.min_visit_s and p.state != TableState.FREE:
-                    guests_present = any(t - g.last_seen <= th.lost_track_grace_s for g in ev.guests.values())
+                    # The party must still be there after the visitor left; otherwise this
+                    # was more likely a guest (with a new track ID) leaving with the party.
+                    settle = min(2.0, th.lost_track_grace_s / 2)
+                    guests_present = any(g.last_seen >= v.last_seen + settle for g in ev.guests.values())
                     if p.state == TableState.NEEDS_CLEANING or guests_present:
                         kind = "possible_cleaning_visit" if p.state == TableState.NEEDS_CLEANING else "possible_service_visit"
                         visit = self._event(

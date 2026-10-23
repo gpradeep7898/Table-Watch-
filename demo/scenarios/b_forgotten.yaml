@@ -1,0 +1,22 @@
+id: forgotten
+order: 2
+name: "B: Forgotten customers"
+summary: One party never gets a server. The waiting alert fires once, then service resolves it.
+description: >
+  Table 4 is seated during a busy moment and nobody visits. The waiting
+  timer climbs past the configured threshold, exactly one UNSERVED_TOO_LONG
+  alert fires, the simulated manager sends a server, and the confirmed
+  service resolves the alert. You can confirm service yourself before the
+  simulated staff do.
+seed: 202
+start_time: "2026-10-23T12:30:00"
+duration_s: 1400
+waiters: 3
+staff_auto_confirm: true
+confirm_lag_s: [8, 15]
+alert_response_lag_s: [45, 60]
+parties:
+  - { table: T4, size: 2, arrive_s: 5,   service_delay_s: null, dine_s: 1000, cleaning_delay_s: 60 }
+  - { table: T2, size: 2, arrive_s: 25,  service_delay_s: 50, dine_s: 700, cleaning_delay_s: 50 }
+  - { table: T7, size: 5, arrive_s: 60,  service_delay_s: 70, dine_s: 900, cleaning_delay_s: 60 }
+  - { table: T10, size: 4, arrive_s: 140, service_delay_s: 60, dine_s: 800, cleaning_delay_s: 50 }

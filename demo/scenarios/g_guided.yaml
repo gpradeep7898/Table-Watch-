@@ -1,0 +1,24 @@
+id: guided
+order: 0
+name: "Guided demo (presentation)"
+summary: A few-minute story for restaurant owners. You confirm service and cleaning.
+description: >
+  A short scripted lunch for presentation mode. Customers arrive and sit.
+  One table waits past the threshold and raises an alert. You confirm
+  service. Another party leaves, the table needs cleaning, and you confirm
+  cleaning. If nobody clicks, simulated staff step in after a while so the
+  story always finishes.
+seed: 7
+start_time: "2026-10-23T12:15:00"
+duration_s: 900
+waiters: 3
+staff_auto_confirm: true
+confirm_lag_s: [6, 12]
+operator_confirm_lag_s: 150
+alert_response_lag_s: [60, 70]
+parties:
+  - { table: T3, size: 3, arrive_s: 3,   service_delay_s: 35, dine_s: 820, cleaning_delay_s: 40 }
+  - { table: T6, size: 4, arrive_s: 12,  service_delay_s: null, dine_s: 840, cleaning_delay_s: 40, operator_confirms: [service] }
+  - { table: T1, size: 2, arrive_s: 20,  service_delay_s: 30, dine_s: 420, cleaning_delay_s: 25, operator_confirms: [cleaning] }
+  - { table: T9, size: 4, arrive_s: 50,  service_delay_s: 45, dine_s: 800, cleaning_delay_s: 40 }
+  - { table: T7, size: 5, arrive_s: 140, service_delay_s: 50, dine_s: 700, cleaning_delay_s: 50 }

@@ -1,0 +1,32 @@
+id: rush
+order: 4
+name: "D: Peak-hour rush"
+summary: Eleven parties in under three minutes with two servers. Several tables need attention at once.
+description: >
+  Friday 7 pm. The dining room fills fast and two servers cannot keep up.
+  Service requests queue, some tables wait past the threshold, cleaning
+  backs up, and a party waits at the host stand for a free table. The
+  analytics page reflects the rush from the generated events.
+seed: 404
+start_time: "2026-10-23T19:00:00"
+duration_s: 2400
+waiters: 1
+staff_auto_confirm: true
+confirm_lag_s: [10, 25]
+alert_response_lag_s: [30, 45]
+parties:
+  - { table: null, size: 4, arrive_s: 5,   service_delay_s: 70, dine_s: 1100, cleaning_delay_s: 60 }
+  - { table: null, size: 2, arrive_s: 15,  service_delay_s: 70, dine_s: 900,  cleaning_delay_s: 60 }
+  - { table: null, size: 5, arrive_s: 25,  service_delay_s: 70, dine_s: 1200, cleaning_delay_s: 80 }
+  - { table: null, size: 2, arrive_s: 38,  service_delay_s: 70, dine_s: 800,  cleaning_delay_s: 60 }
+  - { table: null, size: 3, arrive_s: 50,  service_delay_s: 70, dine_s: 1000, cleaning_delay_s: 70 }
+  - { table: null, size: 4, arrive_s: 62, service_delay_s: 70, dine_s: 1150, cleaning_delay_s: 60 }
+  - { table: null, size: 2, arrive_s: 75, service_delay_s: 70, dine_s: 700,  cleaning_delay_s: 90 }
+  - { table: null, size: 6, arrive_s: 90, service_delay_s: 70, dine_s: 1300, cleaning_delay_s: 80 }
+  - { table: null, size: 2, arrive_s: 105, service_delay_s: 70, dine_s: 750,  cleaning_delay_s: 60 }
+  - { table: null, size: 4, arrive_s: 120, service_delay_s: 70, dine_s: 1000, cleaning_delay_s: 60 }
+  - { table: null, size: 2, arrive_s: 140, service_delay_s: 70, dine_s: 800,  cleaning_delay_s: 60 }
+walkers:
+  - { at_s: 400, route: restroom }
+  - { at_s: 640, route: restroom }
+  - { at_s: 900, route: restroom }

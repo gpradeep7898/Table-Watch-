@@ -1,0 +1,37 @@
+# TableWatch Demo Bistro: a fictional restaurant used for simulation.
+# Units are meters. Origin is the top-left corner of the floor; y points down.
+# The floor plan in the dashboard and the synthetic overhead camera both
+# use this layout.
+restaurant:
+  id: demo-bistro
+  name: TableWatch Demo Bistro
+  floor: { width_m: 20.0, height_m: 12.5 }
+  zone_margin_m: 0.9        # seating zone = table footprint grown by this much
+  areas:
+    - { id: window, name: Window Row, rect: [0.4, 0.4, 15.0, 3.6] }
+    - { id: main, name: Main Dining, rect: [0.4, 4.6, 14.6, 8.0] }
+    - { id: booths, name: Booths, rect: [3.0, 8.8, 14.6, 12.1] }
+  fixtures:
+    - { id: entrance, name: Entrance, kind: door, rect: [0.0, 10.4, 0.5, 12.0] }
+    - { id: host, name: Host Stand, kind: host, rect: [1.0, 9.6, 2.2, 10.4] }
+    - { id: kitchen, name: Kitchen Pass & Service Station, kind: service, rect: [15.5, 0.0, 20.0, 4.6] }
+    - { id: bar, name: Bar (not monitored), kind: bar, rect: [16.4, 6.0, 19.6, 11.2] }
+    - { id: restroom, name: Restrooms, kind: restroom, rect: [13.4, 12.0, 15.2, 12.5] }
+  points:
+    entrance: [0.4, 11.2]
+    host: [1.6, 10.9]
+    restroom: [14.3, 12.2]
+    staff_home: [[16.4, 3.0], [17.3, 3.4], [18.2, 3.0], [19.0, 3.4]]
+    aisles_y: [4.1, 8.4]
+    service_aisle_x: 15.1
+  tables:
+    - { id: T1,  label: Table 1,  area: Window Row,  seats: 2, center: [3.0, 2.0],  size: [0.9, 0.9] }
+    - { id: T2,  label: Table 2,  area: Window Row,  seats: 2, center: [6.0, 2.0],  size: [0.9, 0.9] }
+    - { id: T3,  label: Table 3,  area: Window Row,  seats: 4, center: [9.3, 2.0],  size: [1.4, 1.0] }
+    - { id: T4,  label: Table 4,  area: Window Row,  seats: 4, center: [12.8, 2.0], size: [1.4, 1.0] }
+    - { id: T5,  label: Table 5,  area: Main Dining, seats: 4, center: [3.5, 6.3],  size: [1.2, 1.2] }
+    - { id: T6,  label: Table 6,  area: Main Dining, seats: 4, center: [7.3, 6.3],  size: [1.2, 1.2] }
+    - { id: T7,  label: Table 7,  area: Main Dining, seats: 6, center: [11.6, 6.3], size: [2.2, 1.1] }
+    - { id: T8,  label: Table 8,  area: Booths,      seats: 2, center: [5.0, 10.4], size: [0.9, 0.9] }
+    - { id: T9,  label: Booth 9,  area: Booths,      seats: 4, center: [8.6, 10.4], size: [1.4, 1.0], shape: booth, staff_side: left }
+    - { id: T10, label: Booth 10, area: Booths,      seats: 6, center: [11.4, 10.4], size: [1.8, 1.0], shape: booth }

@@ -1,0 +1,29 @@
+# Camera definitions committed to the repo. Only the synthetic simulation
+# camera lives here. Real cameras are added from the Cameras page (stored in
+# the local database) or in configs/cameras.local.yaml (gitignored).
+#
+# Never put credentials in this file. For RTSP use url_env to read the URL
+# from an environment variable defined in .env (gitignored).
+cameras:
+  - id: sim-cam-1
+    name: Synthetic overhead camera (SIMULATED)
+    kind: simulation
+    anchor: centroid          # overhead view: body center is a good anchor
+    zones_file: configs/zones/demo.json
+
+# Example entries for configs/cameras.local.yaml:
+#
+#  - id: dining-cam
+#    name: Dining room camera
+#    kind: rtsp
+#    url_env: TABLEWATCH_CAM_DINING_URL   # value lives in .env
+#    anchor: bottom_center               # angled view: use the feet
+#    sample_fps: 4
+#    inference_size: 416
+#    zones_file: configs/zones/dining-cam.json
+#
+#  - id: lunch-recording
+#    name: Recorded lunch service
+#    kind: file
+#    path: media/lunch.mp4               # must live under media/
+#    anchor: bottom_center
